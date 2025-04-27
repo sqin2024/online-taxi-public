@@ -39,7 +39,7 @@ public class JwtInterceptor implements HandlerInterceptor {
 
         if(!result) {
             PrintWriter out = response.getWriter();
-            out.println(JSONObject.fromObject(ResponseResult.fail(resultString).toString()));
+            out.println(JSONObject.fromObject(ResponseResult.fail(resultString)).toString());
         }
         return result;
     }
