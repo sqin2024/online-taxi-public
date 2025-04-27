@@ -1,5 +1,6 @@
 package com.sqin.apipassenger.controller;
 
+import com.sqin.internalcommon.dto.ResponseResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -8,12 +9,12 @@ public class TestController {
 
 
     @GetMapping("/authTest")
-    public String authTest() {
-        return "true";
+    public ResponseResult authTest() {
+        return ResponseResult.success("auth test");
     }
 
     @GetMapping("/noauthTest")
-    public String noauthTest() {
-        return "no auth test";
+    public ResponseResult noauthTest() {
+        return ResponseResult.success("no auth test");
     }
 }

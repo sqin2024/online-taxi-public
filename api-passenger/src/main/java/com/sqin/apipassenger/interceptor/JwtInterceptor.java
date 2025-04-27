@@ -34,41 +34,21 @@ public class JwtInterceptor implements HandlerInterceptor {
         String resultString = "";
 
         String token = request.getHeader("Authorization");
-        TokenResult tokenResult = null;
-        try {
-            tokenResult = JwtUtils.parseToken(token);
-        } catch (SignatureVerificationException e) {
-            resultString = "token sign error";
-            result = false;
-        } catch (TokenExpiredException e) {
-            resultString = "token time out";
-            result = false;
-        } catch (AlgorithmMismatchException e){
-            resultString = "token AlgorithmMismatchException";
-            result = false;
-        } catch (Exception e) {
-            resultString = "token invalid";
-            result = false;
-        }
+        TokenResult tokenResult = JwtUtils.checkToken(token);
 
         if(tokenResult == null) {
-            resultString = "token invalid";
+            resultString = "access token invalid";
             result = false;
         } else {
             // get token from redis
             String phone = tokenResult.getPhone();
             String identity = tokenResult.getIdentity();
             String accessTokenKey = RedisPrefixUtils.generateTokeyKey(phone, identity, TokenConstants.ACCESS_TOKEN_TYPE);
-            String refreshTokenKey = RedisPrefixUtils.generateTokeyKey(phone, identity, TokenConstants.REFRESH_TOKEN_TYPE);
             String cachedToken = stringRedisTemplate.opsForValue().get(accessTokenKey);
-            if(StringUtils.isBlank(cachedToken)) {
+
+            if(StringUtils.isBlank(cachedToken) || !token.trim().equals(cachedToken.trim())) {
                 resultString = "no token in redis";
                 result = false;
-            } else {
-                if(!token.trim().equals(cachedToken.trim())) {
-                    resultString = "token from user is different with cached token";
-                    result = false;
-                }
             }
         }
 

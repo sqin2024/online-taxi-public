@@ -21,6 +21,8 @@ public class JwtUtils {
 
     private static final String JWT_TOKEN_TYPE = "tokenType";
 
+    private static final String JWT_TOKEN_TIME = "tokenTime";
+
 
     //生成token
     public static String generateToken(String passengerPhone, String identity, String tokenType) {
@@ -28,11 +30,8 @@ public class JwtUtils {
         map.put(JWT_KEY_PHONE, passengerPhone);
         map.put(JWT_KEY_IDENTITY, identity);
         map.put(JWT_TOKEN_TYPE, tokenType);
-
-        // token 過期時間
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.add(Calendar.DATE, 1);
-//        Date date = calendar.getTime();
+        // token 加个时间戳， 防止每次生成的token一样。
+        map.put(JWT_TOKEN_TIME, Calendar.getInstance().getTime().toString());
 
         JWTCreator.Builder builder = JWT.create();
         // 整合map
@@ -45,6 +44,22 @@ public class JwtUtils {
         // 生成 token
         String sign = builder.sign(Algorithm.HMAC256(SIGN));
         return sign;
+    }
+
+    /**
+     * 校验token，判断token是否异常
+     * @param token
+     * @return
+     */
+    public static TokenResult checkToken(String token) {
+        TokenResult tokenResult = null;
+        try {
+            tokenResult = JwtUtils.parseToken(token);
+        } catch (Exception e) {
+//            resultString = "token invalid";
+//            result = false;
+        }
+        return tokenResult;
     }
 
 

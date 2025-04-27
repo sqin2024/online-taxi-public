@@ -5,6 +5,9 @@ import lombok.Getter;
 public enum CommonStatusEnum {
 
     VERIFICATION_CODE_ERROR(1099, "驗證碼不正確"),
+
+    TOKEN_ERROR(1199, "Token错误"),
+
     SUCCESS(1, "success"),
     FAIL(0, "fail");
 
