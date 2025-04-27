@@ -27,9 +27,9 @@ public class JwtUtils {
         map.put(JWT_KEY_IDENTITY, identity);
 
         // token 過期時間
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, 1);
-        Date date = calendar.getTime();
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.add(Calendar.DATE, 1);
+//        Date date = calendar.getTime();
 
         JWTCreator.Builder builder = JWT.create();
         // 整合map
@@ -37,7 +37,7 @@ public class JwtUtils {
             builder.withClaim(k, v);
         });
         // 整合過期時間
-        builder.withExpiresAt(date);
+//        builder.withExpiresAt(date);
 
         // 生成 token
         String sign = builder.sign(Algorithm.HMAC256(SIGN));
@@ -61,7 +61,7 @@ public class JwtUtils {
         String s = generateToken("17717530050", "1");
         System.out.println(s);
 
-        System.out.println("解析后的:" + parseToken(s).getPhone() + "...身份："+ parseToken(s).getIdentity());
+        System.out.println("解析后的:" + parseToken(s).getPhone() + "...身份：" + parseToken(s).getIdentity());
     }
 
 }

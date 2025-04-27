@@ -30,6 +30,8 @@ public class VerificationCodeService {
 
     private String verificationCodePrefix = "passenger-verification-code-";
 
+    private String tokenPrefix = "token-";
+
     public ResponseResult generatorCode(String passengerPhone) {
         //调用验证码服务 - 微服務間的調用，获取6位数字验证码。
         ResponseResult<NumberCodeResponse> numberCodeResponse = serviceVerificationCodeClient.getNumberCode(6);
@@ -65,12 +67,35 @@ public class VerificationCodeService {
 
         // 颁发令牌
         String token = JwtUtils.generateToken(passengerPhone, IdentityConstant.PASSENGER_IDENTITY);
+
+        // 将token存储到redis中
+        String tokenKey = generateTokeyKey(passengerPhone,  IdentityConstant.PASSENGER_IDENTITY);
+        // 这里增加了有限效后，就不需要给token本身设置有效期了
+        stringRedisTemplate.opsForValue().set(tokenKey, token, 30, TimeUnit.DAYS);
+
+
+
         TokenResponse tokenResponse = new TokenResponse();
         tokenResponse.setToken(token);
         return ResponseResult.success(tokenResponse);
     }
 
+    /**
+     * 根据手机号，生成验证码的redis key
+     * @param passengerPhone
+     * @return
+     */
     private String generateKeyByPhone(String passengerPhone) {
         return verificationCodePrefix + passengerPhone;
+    }
+
+    /**
+     * 根据手机号和身份标识，生成token
+     * @param phone
+     * @param identity
+     * @return
+     */
+    private String generateTokeyKey(String phone, String identity) {
+        return tokenPrefix + phone + "-" + identity;
     }
 }
