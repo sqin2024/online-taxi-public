@@ -3,6 +3,7 @@ package com.sqin.apipassenger.interceptor;
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.sqin.internalcommon.constant.TokenConstants;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.dto.TokenResult;
 import com.sqin.internalcommon.util.JwtUtils;
@@ -57,8 +58,9 @@ public class JwtInterceptor implements HandlerInterceptor {
             // get token from redis
             String phone = tokenResult.getPhone();
             String identity = tokenResult.getIdentity();
-            String tokenKey = RedisPrefixUtils.generateTokeyKey(phone, identity);
-            String cachedToken = stringRedisTemplate.opsForValue().get(tokenKey);
+            String accessTokenKey = RedisPrefixUtils.generateTokeyKey(phone, identity, TokenConstants.ACCESS_TOKEN_TYPE);
+            String refreshTokenKey = RedisPrefixUtils.generateTokeyKey(phone, identity, TokenConstants.REFRESH_TOKEN_TYPE);
+            String cachedToken = stringRedisTemplate.opsForValue().get(accessTokenKey);
             if(StringUtils.isBlank(cachedToken)) {
                 resultString = "no token in redis";
                 result = false;

@@ -4,6 +4,7 @@ import com.sqin.apipassenger.remote.ServicePassengerUserClient;
 import com.sqin.apipassenger.remote.ServiceVerificationCodeClient;
 import com.sqin.internalcommon.constant.CommonStatusEnum;
 import com.sqin.internalcommon.constant.IdentityConstant;
+import com.sqin.internalcommon.constant.TokenConstants;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.request.VerificationCodeDTO;
 import com.sqin.internalcommon.response.NumberCodeResponse;
@@ -47,7 +48,6 @@ public class VerificationCodeService {
 
         // 根据手机号， 从redis里拿数据
         String codeRedis = stringRedisTemplate.opsForValue().get(key);
-        System.out.println("get code from redis, code = " + codeRedis);
 
         // 校验验证码
         if (StringUtils.isBlank(codeRedis)) {
@@ -63,14 +63,21 @@ public class VerificationCodeService {
         servicePassengerUserClient.loginOrRegister(verificationCodeDTO);
 
         // 颁发令牌
-        String token = JwtUtils.generateToken(passengerPhone, IdentityConstant.PASSENGER_IDENTITY);
+        String accessToken = JwtUtils.generateToken(passengerPhone, IdentityConstant.PASSENGER_IDENTITY, TokenConstants.ACCESS_TOKEN_TYPE);
+        String refreshToken = JwtUtils.generateToken(passengerPhone, IdentityConstant.PASSENGER_IDENTITY, TokenConstants.REFRESH_TOKEN_TYPE);
 
         // 将token存储到redis中
-        String tokenKey = RedisPrefixUtils.generateTokeyKey(passengerPhone,  IdentityConstant.PASSENGER_IDENTITY);
+        String accessTokenKey = RedisPrefixUtils.generateTokeyKey(passengerPhone,  IdentityConstant.PASSENGER_IDENTITY, TokenConstants.ACCESS_TOKEN_TYPE);
+        String refreshTokenKey = RedisPrefixUtils.generateTokeyKey(passengerPhone,  IdentityConstant.PASSENGER_IDENTITY, TokenConstants.REFRESH_TOKEN_TYPE);
         // 这里增加了有限效后，就不需要给token本身设置有效期了
-        stringRedisTemplate.opsForValue().set(tokenKey, token, 30, TimeUnit.DAYS);
+        stringRedisTemplate.opsForValue().set(accessTokenKey, accessToken, 30, TimeUnit.DAYS);
+        // 这里refreshToken比accessToken的有效期要长一点点
+        stringRedisTemplate.opsForValue().set(refreshTokenKey, refreshToken, 31, TimeUnit.DAYS);
+
+
         TokenResponse tokenResponse = new TokenResponse();
-        tokenResponse.setToken(token);
+        tokenResponse.setAccessToken(accessToken);
+        tokenResponse.setRefreshToken(refreshToken);
         return ResponseResult.success(tokenResponse);
     }
 }
