@@ -16,7 +16,7 @@ target/
 .idea/workspace.xml
 
 ### Eclipse ###
-.apt_generated
+.apt_generatedpl
 .classpath
 .factorypath
 .project

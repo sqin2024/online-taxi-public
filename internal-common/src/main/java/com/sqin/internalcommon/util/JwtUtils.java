@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.sqin.internalcommon.dto.TokenResult;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -14,13 +15,16 @@ public class JwtUtils {
     //
     private static final String SIGN = "CPFsqin!@#$$";
 
-    private static final String JWT_KEY = "passengerPhone";
+    private static final String JWT_KEY_PHONE = "passengerPhone";
+
+    private static final String JWT_KEY_IDENTITY = "identity";
 
 
     //生成token
-    public static String generateToken(String passengerPhone) {
+    public static String generateToken(String passengerPhone, String identity) {
         Map<String, String> map = new HashMap<>();
-        map.put(JWT_KEY, passengerPhone);
+        map.put(JWT_KEY_PHONE, passengerPhone);
+        map.put(JWT_KEY_IDENTITY, identity);
 
         // token 過期時間
         Calendar calendar = Calendar.getInstance();
@@ -42,20 +46,22 @@ public class JwtUtils {
 
 
     // 解析token
-    public static String parseToken(String token) {
+    public static TokenResult parseToken(String token) {
         DecodedJWT verify = JWT.require(Algorithm.HMAC256(SIGN)).build().verify(token);
-        return verify.getClaim(JWT_KEY).toString();
+        String phone = verify.getClaim(JWT_KEY_PHONE).toString();
+        String identity = verify.getClaim(JWT_KEY_IDENTITY).toString();
+        TokenResult tokenResult = new TokenResult();
+        tokenResult.setIdentity(identity);
+        tokenResult.setPhone(phone);
+        return tokenResult;
     }
 
     // 測試生成Token
     public static void main(String[] args) {
-        Map<String, String> map = new HashMap<>();
-        map.put("name", "zhang san");
-        map.put("age", "3");
-        String s = generateToken("17717530050");
+        String s = generateToken("17717530050", "1");
         System.out.println(s);
 
-        System.out.println("解析后的:" + parseToken(s));
+        System.out.println("解析后的:" + parseToken(s).getPhone() + "...身份："+ parseToken(s).getIdentity());
     }
 
 }

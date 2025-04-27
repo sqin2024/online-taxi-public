@@ -18,8 +18,6 @@ public class UserService {
     private PassengerUserMapper passengerUserMapper;
 
     public ResponseResult loginOrRegister(String passengerPhone) {
-
-        System.out.println("user service");
         Map<String, Object> map = new HashMap<>();
         map.put("passenger_phone", passengerPhone);
         List<PassengerUser> passengerUsers = passengerUserMapper.selectByMap(map);
@@ -33,7 +31,6 @@ public class UserService {
             LocalDateTime now = LocalDateTime.now();
             passengerUser.setGmtCreate(now);
             passengerUser.setGmtModified(now);
-
             passengerUserMapper.insert(passengerUser);
         }
 

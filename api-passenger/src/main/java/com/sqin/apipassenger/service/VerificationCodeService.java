@@ -3,10 +3,12 @@ package com.sqin.apipassenger.service;
 import com.sqin.apipassenger.remote.ServicePassengerUserClient;
 import com.sqin.apipassenger.remote.ServiceVerificationCodeClient;
 import com.sqin.internalcommon.constant.CommonStatusEnum;
+import com.sqin.internalcommon.constant.IdentityConstant;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.request.VerificationCodeDTO;
 import com.sqin.internalcommon.response.NumberCodeResponse;
 import com.sqin.internalcommon.response.TokenResponse;
+import com.sqin.internalcommon.util.JwtUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -29,19 +31,15 @@ public class VerificationCodeService {
     private String verificationCodePrefix = "passenger-verification-code-";
 
     public ResponseResult generatorCode(String passengerPhone) {
-        //调用验证码服务
-        System.out.println("获取验证码");
+        //调用验证码服务 - 微服務間的調用，获取6位数字验证码。
         ResponseResult<NumberCodeResponse> numberCodeResponse = serviceVerificationCodeClient.getNumberCode(6);
         int numberCode = numberCodeResponse.getData().getNumberCode();
-
-        System.out.println("remote number code: " + numberCode);
 
         // save to redis: key, value, expire time
         String key = generateKeyByPhone(passengerPhone);
         stringRedisTemplate.opsForValue().set(key, numberCode + "", 2, TimeUnit.MINUTES);
 
-        // send message, 可以调用阿里短信服务，腾讯短信通
-
+        // todo: send message, 可以调用阿里短信服务，腾讯短信通
         return ResponseResult.success();
     }
 
@@ -56,7 +54,6 @@ public class VerificationCodeService {
         if (StringUtils.isBlank(codeRedis)) {
             return ResponseResult.fail(CommonStatusEnum.VERIFICATION_CODE_ERROR.getCode(), CommonStatusEnum.VERIFICATION_CODE_ERROR.getValue());
         }
-
         if (!verificationCode.trim().equals(codeRedis.trim())) {
             return ResponseResult.fail(CommonStatusEnum.VERIFICATION_CODE_ERROR.getCode(), CommonStatusEnum.VERIFICATION_CODE_ERROR.getValue());
         }
@@ -67,9 +64,9 @@ public class VerificationCodeService {
         servicePassengerUserClient.loginOrRegister(verificationCodeDTO);
 
         // 颁发令牌
-
+        String token = JwtUtils.generateToken(passengerPhone, IdentityConstant.PASSENGER_IDENTITY);
         TokenResponse tokenResponse = new TokenResponse();
-        tokenResponse.setToken("test token value");
+        tokenResponse.setToken(token);
         return ResponseResult.success(tokenResponse);
     }
 

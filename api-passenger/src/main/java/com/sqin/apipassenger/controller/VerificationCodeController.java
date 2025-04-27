@@ -15,11 +15,13 @@ public class VerificationCodeController {
     @Autowired
     private VerificationCodeService verificationCodeService;
 
+    /**
+     * 用戶輸入手機號后，獲取驗證碼
+     * @param verificationCodeDTO
+     * @return
+     */
     @GetMapping("/verification-code")
     public ResponseResult verificationCode(@RequestBody VerificationCodeDTO verificationCodeDTO) {
-
-        System.out.println(verificationCodeDTO.getPassengerPhone());
-
         return verificationCodeService.generatorCode(verificationCodeDTO.getPassengerPhone());
     }
 
