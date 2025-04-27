@@ -1,7 +1,8 @@
 package com.sqin.servicepassengeruser.service;
 
+import com.sqin.internalcommon.constant.CommonStatusEnum;
 import com.sqin.internalcommon.dto.ResponseResult;
-import com.sqin.servicepassengeruser.dto.PassengerUser;
+import com.sqin.internalcommon.dto.PassengerUser;
 import com.sqin.servicepassengeruser.mapper.PassengerUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,23 @@ public class UserService {
         }
 
         return ResponseResult.success();
+    }
+
+    /**
+     * 根据手机号查询用户信息
+     * @param passengerPhone
+     * @return
+     */
+    public ResponseResult getUserByPhone(String passengerPhone) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("passenger_phone", passengerPhone);
+        List<PassengerUser> passengerUsers = passengerUserMapper.selectByMap(map);
+        if(passengerUsers.size() == 0) {
+            return ResponseResult.fail(CommonStatusEnum.USER_NOT_EXIST.getCode(), CommonStatusEnum.USER_NOT_EXIST.getValue());
+        } else {
+            PassengerUser passengerUser = passengerUsers.get(0);
+            return ResponseResult.success(passengerUser);
+        }
     }
 
 }

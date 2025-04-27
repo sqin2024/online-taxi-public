@@ -8,6 +8,8 @@ public enum CommonStatusEnum {
 
     TOKEN_ERROR(1199, "Token错误"),
 
+    USER_NOT_EXIST(1200, "user不存在"),
+
     SUCCESS(1, "success"),
     FAIL(0, "fail");
 
