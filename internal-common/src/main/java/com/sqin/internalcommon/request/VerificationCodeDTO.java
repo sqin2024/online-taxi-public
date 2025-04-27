@@ -1,4 +1,4 @@
-package com.sqin.apipassenger.request;
+package com.sqin.internalcommon.request;
 
 import lombok.Data;
 

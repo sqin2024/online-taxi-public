@@ -1,6 +1,6 @@
 package com.sqin.apipassenger.controller;
 
-import com.sqin.apipassenger.request.VerificationCodeDTO;
+import com.sqin.internalcommon.request.VerificationCodeDTO;
 import com.sqin.apipassenger.service.VerificationCodeService;
 import com.sqin.internalcommon.dto.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
