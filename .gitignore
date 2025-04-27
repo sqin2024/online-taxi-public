@@ -13,6 +13,7 @@ target/
 *.ipr
 .idea
 .idea/encodings.xml
+.idea/workspace.xml
 
 ### Eclipse ###
 .apt_generated

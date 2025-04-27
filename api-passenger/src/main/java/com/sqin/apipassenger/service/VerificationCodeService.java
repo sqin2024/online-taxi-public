@@ -1,8 +1,10 @@
 package com.sqin.apipassenger.service;
 
+import com.sqin.apipassenger.remote.ServicePassengerUserClient;
 import com.sqin.apipassenger.remote.ServiceVerificationCodeClient;
 import com.sqin.internalcommon.constant.CommonStatusEnum;
 import com.sqin.internalcommon.dto.ResponseResult;
+import com.sqin.internalcommon.request.VerificationCodeDTO;
 import com.sqin.internalcommon.response.NumberCodeResponse;
 import com.sqin.internalcommon.response.TokenResponse;
 import org.apache.commons.lang.StringUtils;
@@ -20,6 +22,9 @@ public class VerificationCodeService {
 
     @Autowired
     private ServiceVerificationCodeClient serviceVerificationCodeClient;
+
+    @Autowired
+    private ServicePassengerUserClient servicePassengerUserClient;
 
     private String verificationCodePrefix = "passenger-verification-code-";
 
@@ -57,6 +62,9 @@ public class VerificationCodeService {
         }
 
         // 判断原来是否有用户，并进行相应的处理
+        VerificationCodeDTO verificationCodeDTO = new VerificationCodeDTO();
+        verificationCodeDTO.setPassengerPhone(passengerPhone);
+        servicePassengerUserClient.loginOrRegister(verificationCodeDTO);
 
         // 颁发令牌
 
