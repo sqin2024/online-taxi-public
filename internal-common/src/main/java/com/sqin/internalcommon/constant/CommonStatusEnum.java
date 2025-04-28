@@ -10,6 +10,8 @@ public enum CommonStatusEnum {
 
     USER_NOT_EXIST(1200, "user不存在"),
 
+    PRICE_RULE_EMPTY(1300, "计价规则不存在 "),
+
     SUCCESS(1, "success"),
     FAIL(0, "fail");
 
