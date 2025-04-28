@@ -27,7 +27,7 @@ public class ForecastPriceService {
     @Autowired
     private PriceRuleMapper priceRuleMapper;
 
-    public ResponseResult forecastPrice(String depLongitude, String depLatitude, String destLongitude, String destLatitude) {
+    public ResponseResult<ForecastPriceResponse> forecastPrice(String depLongitude, String depLatitude, String destLongitude, String destLatitude) {
 
         // 调用地图服务，查询距离和时长
         ForecastPriceDTO forecastPriceDTO = new ForecastPriceDTO();
