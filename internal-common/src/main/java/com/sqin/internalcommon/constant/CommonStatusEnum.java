@@ -14,6 +14,15 @@ public enum CommonStatusEnum {
 
     MAP_DISTRICT_ERROR(1400, "请求地区信息错误"),
 
+    DRIVER_CAR_BIND_NOT_EXIST(1501, "司机汽车绑定关系不存在"),
+
+    DRIVER_CAR_BIND_EXIST(1502, "司机汽车绑定关系已存在"),
+
+    DRIVER_BIND_EXIST(1503, "司机已经绑定其他车辆"),
+
+    CAR_BIND_EXIST(1504, "汽车已经被其他司机绑定"),
+
+
     SUCCESS(1, "success"),
     FAIL(0, "fail");
 

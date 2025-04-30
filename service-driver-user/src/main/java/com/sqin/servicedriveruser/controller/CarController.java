@@ -22,7 +22,6 @@ import java.awt.geom.RectangularShape;
  * @author Qin
  * @since 2025-04-30
  */
-@Controller
 @RestController
 public class CarController {
 

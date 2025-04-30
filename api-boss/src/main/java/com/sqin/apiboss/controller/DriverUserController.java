@@ -1,6 +1,8 @@
 package com.sqin.apiboss.controller;
 
 import com.sqin.apiboss.service.DriverUserService;
+import com.sqin.internalcommon.dto.Car;
+import com.sqin.internalcommon.dto.DriverCarBindingRelationship;
 import com.sqin.internalcommon.dto.DriverUser;
 import com.sqin.internalcommon.dto.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,21 @@ public class DriverUserController {
     @PutMapping("/driver-user")
     public ResponseResult updateDriverUser(@RequestBody DriverUser driverUser) {
         return driverUserService.updateDriverUser(driverUser);
+    }
+
+    @PostMapping("/car")
+    public ResponseResult addCar(@RequestBody Car car) {
+        return driverUserService.addCar(car);
+    }
+
+    @PostMapping("/driver-car-binding-relationship/bind")
+    public ResponseResult bind(@RequestBody DriverCarBindingRelationship driverCarBindingRelationship) {
+        return driverUserService.bind(driverCarBindingRelationship);
+    }
+
+    @PostMapping("/driver-car-binding-relationship/unbind")
+    public ResponseResult unbind(@RequestBody DriverCarBindingRelationship driverCarBindingRelationship) {
+        return driverUserService.unbind(driverCarBindingRelationship);
     }
 
 }
