@@ -1,5 +1,6 @@
 package com.sqin.apidriver.remote;
 
+import com.sqin.internalcommon.dto.Car;
 import com.sqin.internalcommon.dto.DriverUser;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.response.DriverUserExistsResponse;
@@ -17,5 +18,8 @@ public interface ServiceDriverUserClient {
 
     @GetMapping("/check-driver/{driverPhone}")
     public ResponseResult<DriverUserExistsResponse> getUser(@PathVariable("driverPhone") String driverPhone);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/car")
+    public ResponseResult<Car> getCarById(@RequestParam Long carId);
 
 }

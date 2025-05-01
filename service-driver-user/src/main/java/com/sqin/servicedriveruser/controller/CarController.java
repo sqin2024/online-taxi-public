@@ -5,12 +5,9 @@ import com.sqin.internalcommon.dto.Car;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.servicedriveruser.service.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.awt.geom.RectangularShape;
 
@@ -31,6 +28,11 @@ public class CarController {
     @PostMapping("/car")
     public ResponseResult addCar(@RequestBody Car car) {
         return carService.addCar(car);
+    }
+
+    @GetMapping("/car")
+    public ResponseResult<Car> getCarById(Long carId) {
+        return carService.getCarById(carId);
     }
 
 }
