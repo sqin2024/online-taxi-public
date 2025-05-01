@@ -19,11 +19,11 @@ public class RedisPrefixUtils {
 
     /**
      * 根据手机号，生成验证码的redis key
-     * @param passengerPhone
+     * @param driverPhone
      * @return
      */
-    public static String generateDriverKeyByPhone(String passengerPhone) {
-        return driverVerificationCodePrefix + passengerPhone;
+    public static String generateDriverKeyByPhone(String driverPhone) {
+        return driverVerificationCodePrefix + driverPhone;
     }
 
     /**
