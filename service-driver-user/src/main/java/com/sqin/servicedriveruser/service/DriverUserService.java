@@ -1,5 +1,7 @@
 package com.sqin.servicedriveruser.service;
 
+import com.sqin.internalcommon.constant.CommonStatusEnum;
+import com.sqin.internalcommon.constant.DriverCarConstants;
 import com.sqin.internalcommon.dto.DriverUser;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.servicedriveruser.mapper.DriverUserMapper;
@@ -8,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class DriverUserService {
@@ -33,6 +38,17 @@ public class DriverUserService {
         driverUser.setGmtModified(now);
         int i = driverUserMapper.updateById(driverUser);
         return ResponseResult.success(i);
+    }
+
+    public ResponseResult<DriverUser> getDriverUserByPhone(String driverPhone) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("driver_phone", driverPhone);
+        map.put("state", DriverCarConstants.DRIVER_STATE_VALID);
+        List<DriverUser> driverUsers = driverUserMapper.selectByMap(map);
+        if(driverUsers.isEmpty()) {
+            return ResponseResult.fail(CommonStatusEnum.DRIVER_NOT_EXIST.getCode(), CommonStatusEnum.DRIVER_NOT_EXIST.getValue());
+        }
+        return ResponseResult.success(driverUsers.get(0));
     }
 
 }
