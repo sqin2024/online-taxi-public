@@ -17,6 +17,11 @@ public class Car implements Serializable {
 
     private Long id;
 
+    /**
+     * 绑定的终端id
+     */
+    private String tid;
+
     private String address;
 
     private String vehicleNo;
