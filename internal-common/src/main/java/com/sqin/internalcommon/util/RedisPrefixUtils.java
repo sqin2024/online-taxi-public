@@ -2,7 +2,9 @@ package com.sqin.internalcommon.util;
 
 public class RedisPrefixUtils {
 
-    private static String verificationCodePrefix = "passenger-verification-code-";
+    private static String passengerVerificationCodePrefix = "passenger-verification-code-";
+
+    private static String driverVerificationCodePrefix = "driver-verification-code-";
 
     private static String tokenPrefix = "token-";
 
@@ -11,8 +13,17 @@ public class RedisPrefixUtils {
      * @param passengerPhone
      * @return
      */
-    public static String generateKeyByPhone(String passengerPhone) {
-        return verificationCodePrefix + passengerPhone;
+    public static String generatePassengerKeyByPhone(String passengerPhone) {
+        return passengerVerificationCodePrefix + passengerPhone;
+    }
+
+    /**
+     * 根据手机号，生成验证码的redis key
+     * @param passengerPhone
+     * @return
+     */
+    public static String generateDriverKeyByPhone(String passengerPhone) {
+        return driverVerificationCodePrefix + passengerPhone;
     }
 
     /**

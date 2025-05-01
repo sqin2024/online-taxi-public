@@ -37,11 +37,11 @@ public class VerificationCodeService {
             return ResponseResult.fail(CommonStatusEnum.DRIVER_NOT_EXIST.getCode(), CommonStatusEnum.DRIVER_NOT_EXIST.getValue());
         }
         // 获取验证码
-        ResponseResult<NumberCodeResponse> numbercodeResponse = this.serviceVerificationCodeClient.getNumberCode(6);
-        int numberCode = numbercodeResponse.getData().getNumberCode();
+        ResponseResult<NumberCodeResponse> numberCodeResponse = this.serviceVerificationCodeClient.getNumberCode(6);
+        int numberCode = numberCodeResponse.getData().getNumberCode();
 
         // save to redis: key, value, expire time
-        String key = RedisPrefixUtils.generateKeyByPhone(driverPhone);
+        String key = RedisPrefixUtils.generateDriverKeyByPhone(driverPhone);
         stringRedisTemplate.opsForValue().set(key, numberCode + "", 2, TimeUnit.MINUTES);
 
         // 调用第三方发送验证码

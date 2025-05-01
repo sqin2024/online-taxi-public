@@ -36,7 +36,7 @@ public class VerificationCodeService {
         int numberCode = numberCodeResponse.getData().getNumberCode();
 
         // save to redis: key, value, expire time
-        String key = RedisPrefixUtils.generateKeyByPhone(passengerPhone);
+        String key = RedisPrefixUtils.generatePassengerKeyByPhone(passengerPhone);
         stringRedisTemplate.opsForValue().set(key, numberCode + "", 2, TimeUnit.MINUTES);
 
         // todo: send message, 可以调用阿里短信服务，腾讯短信通
@@ -44,7 +44,7 @@ public class VerificationCodeService {
     }
 
     public ResponseResult checkCode(String passengerPhone, String verificationCode) {
-        String key = RedisPrefixUtils.generateKeyByPhone(passengerPhone);
+        String key = RedisPrefixUtils.generatePassengerKeyByPhone(passengerPhone);
 
         // 根据手机号， 从redis里拿数据
         String codeRedis = stringRedisTemplate.opsForValue().get(key);
