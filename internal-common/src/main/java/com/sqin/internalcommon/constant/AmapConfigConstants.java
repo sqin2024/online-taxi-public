@@ -14,6 +14,8 @@ public class AmapConfigConstants {
 
     public static final String POINT_UPLOAD = "https://tsapi.amap.com/v1/track/point/upload";
 
+    public static final String TERMINAL_AROUND_SEARCH = "https://tsapi.amap.com/v1/track/terminal/aroundsearch";
+
     public static final String STATUS = "status";
 
     public static final String ROUTE = "route";
