@@ -3,8 +3,10 @@ package com.sqin.servicedriveruser.service;
 import com.sqin.internalcommon.constant.CommonStatusEnum;
 import com.sqin.internalcommon.constant.DriverCarConstants;
 import com.sqin.internalcommon.dto.DriverUser;
+import com.sqin.internalcommon.dto.DriverUserWorkStatus;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.servicedriveruser.mapper.DriverUserMapper;
+import com.sqin.servicedriveruser.mapper.DriverUserWorkStatusMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +16,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.sqin.internalcommon.constant.DriverCarConstants.DRIVER_WORK_STATUS_START;
+
 @Service
 public class DriverUserService {
 
     @Autowired
     private DriverUserMapper driverUserMapper;
+
+    @Autowired
+    private DriverUserWorkStatusMapper driverUserWorkStatusMapper;
 
     public ResponseResult<DriverUser> testGetDriver() {
         DriverUser driverUser = driverUserMapper.selectById("1");
@@ -30,6 +37,14 @@ public class DriverUserService {
         driverUser.setGmtCreate(now);
         driverUser.setGmtModified(now);
         int insert = driverUserMapper.insert(driverUser);
+
+        // 初始化 司机工作状态表
+        DriverUserWorkStatus driverUserWorkStatus = new DriverUserWorkStatus();
+        driverUserWorkStatus.setDriverId(driverUser.getId());
+        driverUserWorkStatus.setWorkStatus(DriverCarConstants.DRIVER_WORK_STATUS_START);
+        driverUserWorkStatus.setGmtCreate(now);
+        driverUserWorkStatusMapper.insert(driverUserWorkStatus);
+
         return ResponseResult.success(insert);
     }
 

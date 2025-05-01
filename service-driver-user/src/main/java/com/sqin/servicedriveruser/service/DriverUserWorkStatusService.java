@@ -6,6 +6,7 @@ import com.sqin.servicedriveruser.mapper.DriverUserWorkStatusMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class DriverUserWorkStatusService {
         DriverUserWorkStatus driverUserWorkStatus = driverUserWorkStatuses.get(0);
 
         driverUserWorkStatus.setWorkStatus(workStatus);
+        driverUserWorkStatus.setGmtModified(LocalDateTime.now());
         driverUserWorkStatusMapper.updateById(driverUserWorkStatus);
         return ResponseResult.success();
     }
