@@ -22,6 +22,10 @@ public class Car implements Serializable {
      */
     private String tid;
 
+    private String trid;
+
+    private String trname;
+
     private String address;
 
     private String vehicleNo;

@@ -3,16 +3,14 @@
   "errmsg": "OK",
   "data": {
     "name": "飞滴出行service",
-    "sid": 1048818
+    "sid": 1048414
   }
 }
 
 {
-  "errcode": 10000,
-  "errmsg": "OK",
-  "data": {
-    "name": "第一个终端",
-    "tid": 1274205213,
-    "sid": 1048818
-  }
+"code": 1,
+"message": "success",
+"data": {
+"tid": "1274244640"
+}
 }
