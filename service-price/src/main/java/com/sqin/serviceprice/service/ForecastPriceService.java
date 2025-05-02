@@ -1,5 +1,6 @@
 package com.sqin.serviceprice.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.sqin.internalcommon.constant.CommonStatusEnum;
 import com.sqin.internalcommon.dto.PriceRule;
 import com.sqin.internalcommon.dto.ResponseResult;
@@ -28,7 +29,7 @@ public class ForecastPriceService {
     @Autowired
     private PriceRuleMapper priceRuleMapper;
 
-    public ResponseResult<ForecastPriceResponse> forecastPrice(String depLongitude, String depLatitude, String destLongitude, String destLatitude) {
+    public ResponseResult<ForecastPriceResponse> forecastPrice(String depLongitude, String depLatitude, String destLongitude, String destLatitude, String cityCode, String vehicleType) {
 
         // 调用地图服务，查询距离和时长
         ForecastPriceDTO forecastPriceDTO = new ForecastPriceDTO();
@@ -43,11 +44,14 @@ public class ForecastPriceService {
         log.info("distance: " + distance + ", duration: " + duration);
 
         // 根据距离时长和计价规则，计算价格
-        Map<String, Object> queryMap = new HashMap<>();
-        queryMap.put("city_code", "110000");
-        queryMap.put("vehicle_type", "1");
-        List<PriceRule> priceRules = priceRuleMapper.selectByMap(queryMap);
-        if (priceRules.size() == 0 ) {
+        QueryWrapper<PriceRule> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("city_code", cityCode);
+        queryWrapper.eq("vehicle_type", vehicleType);
+        queryWrapper.orderByDesc("fare_version");
+
+        List<PriceRule> priceRules = priceRuleMapper.selectList(queryWrapper);
+
+        if (priceRules.size() == 0) {
             return ResponseResult.fail(CommonStatusEnum.PRICE_RULE_EMPTY.getCode(), CommonStatusEnum.PRICE_RULE_EMPTY.getValue());
         }
 
@@ -57,11 +61,14 @@ public class ForecastPriceService {
 
         ForecastPriceResponse response = new ForecastPriceResponse();
         response.setPrice(price);
+        response.setCityCode(cityCode);
+        response.setVehicleType(vehicleType);
         return ResponseResult.success(response);
     }
 
     /**
      * 根据距离，时长，计价规则，计算最终价格
+     *
      * @param distance
      * @param duration
      * @param priceRule
