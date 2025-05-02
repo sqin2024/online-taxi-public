@@ -28,11 +28,14 @@ public enum CommonStatusEnum {
 
     CAR_BIND_EXIST(1504, "汽车已经被其他司机绑定"),
 
+    CITY_DRIVER_EMPTY(1505, "当前城市没有可用司机"),
+
     DRIVER_NOT_EXIST(1600, "司机不存在"),
 
     ORDER_GOING_ON(1700, "有正在进行的订单"),
 
     CITY_SERVICE_NOT_SERVICE(1701, "当前城市不提供服务"),
+
 
     /**
      * 下单异常

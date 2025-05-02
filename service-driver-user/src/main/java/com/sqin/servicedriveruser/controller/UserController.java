@@ -4,6 +4,7 @@ import com.sqin.internalcommon.constant.DriverCarConstants;
 import com.sqin.internalcommon.dto.DriverUser;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.response.DriverUserExistsResponse;
+import com.sqin.servicedriveruser.mapper.DriverUserMapper;
 import com.sqin.servicedriveruser.service.DriverUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -37,5 +38,7 @@ public class UserController {
         response.setIfExists(ifExists);
         return ResponseResult.success(response);
     }
+
+
 
 }

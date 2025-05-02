@@ -10,6 +10,7 @@ import com.sqin.internalcommon.request.OrderRequest;
 import com.sqin.internalcommon.request.PriceRuleIsNewRequest;
 import com.sqin.internalcommon.util.RedisPrefixUtils;
 import com.sqin.serviceorder.mapper.OrderMapper;
+import com.sqin.serviceorder.remote.ServiceDriverUserClient;
 import com.sqin.serviceorder.remote.ServicePriceClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,20 @@ public class OrderService {
     private ServicePriceClient servicePriceClient;
 
     @Autowired
+    private ServiceDriverUserClient serviceDriverUserClient;
+
+    @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     public ResponseResult add(OrderRequest orderRequest) {
+
+        /**
+         * 查看当前城市是否有司机
+         */
+        ResponseResult<Boolean> availableDriver = serviceDriverUserClient.isAvailableDriver(orderRequest.getAddress());
+        if(!availableDriver.getData()) {
+            return ResponseResult.fail(CommonStatusEnum.CITY_DRIVER_EMPTY.getCode(), CommonStatusEnum.CITY_DRIVER_EMPTY.getValue());
+        }
 
         /**
          * 判断下单的城市和计价规则是否存在
