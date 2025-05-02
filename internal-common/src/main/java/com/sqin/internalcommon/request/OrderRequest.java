@@ -8,6 +8,10 @@ import java.time.LocalDateTime;
 @Data
 public class OrderRequest {
 
+    private Long passengerId;
+
+    private String passengerPhone;
+
     private String address;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

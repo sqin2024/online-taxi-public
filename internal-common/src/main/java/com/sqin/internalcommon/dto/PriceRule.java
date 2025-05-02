@@ -17,4 +17,8 @@ public class PriceRule {
 
     private Double unitPricePerMinute;
 
+    private Integer fareVersion;
+
+    private String fareType;
+
 }
