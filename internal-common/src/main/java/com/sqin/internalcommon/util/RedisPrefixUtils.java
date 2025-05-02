@@ -8,6 +8,8 @@ public class RedisPrefixUtils {
 
     private static String tokenPrefix = "token-";
 
+    private static String blackDeviceCodePrefix = "black-device-";
+
     /**
      * 根据手机号，生成验证码的redis key
      * @param passengerPhone
@@ -34,5 +36,9 @@ public class RedisPrefixUtils {
      */
     public static String generateTokeyKey(String phone, String identity, String tokenType) {
         return tokenPrefix + phone + "-" + identity + "-" + tokenType;
+    }
+
+    public static String generateBlackDeviceCode(String deviceCode) {
+        return blackDeviceCodePrefix + deviceCode;
     }
 }

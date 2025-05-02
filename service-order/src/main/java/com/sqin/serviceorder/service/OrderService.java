@@ -7,13 +7,16 @@ import com.sqin.internalcommon.dto.OrderInfo;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.request.OrderRequest;
 import com.sqin.internalcommon.request.PriceRuleIsNewRequest;
+import com.sqin.internalcommon.util.RedisPrefixUtils;
 import com.sqin.serviceorder.mapper.OrderMapper;
 import com.sqin.serviceorder.remote.ServicePriceClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class OrderService {
@@ -23,6 +26,9 @@ public class OrderService {
 
     @Autowired
     private ServicePriceClient servicePriceClient;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     public ResponseResult add(OrderRequest orderRequest) {
 
@@ -56,6 +62,13 @@ public class OrderService {
             return ResponseResult.fail(CommonStatusEnum.ORDER_GOING_ON.getCode(), CommonStatusEnum.ORDER_GOING_ON.getValue());
         }
 
+        /**
+         * 是否是黑名单设备
+         */
+        if(isBlackDevice(orderRequest)) {
+            return ResponseResult.fail(CommonStatusEnum.DEVICE_IS_BLACK.getCode(), CommonStatusEnum.DEVICE_IS_BLACK.getValue());
+        }
+
         OrderInfo orderInfo = new OrderInfo();
 
         BeanUtils.copyProperties(orderRequest, orderInfo);
@@ -68,5 +81,29 @@ public class OrderService {
         return ResponseResult.success();
     }
 
+    /**
+     * 是否是黑名单
+     * @param orderRequest
+     * @return
+     */
+    private boolean isBlackDevice(OrderRequest orderRequest) {
+        String deviceCode = orderRequest.getDeviceCode();
+        // 生成key
+        String deviceCodeKey = RedisPrefixUtils.generateBlackDeviceCode(deviceCode);
+        Boolean aBoolean = stringRedisTemplate.hasKey(deviceCodeKey);
+        if (aBoolean){
+            String s = stringRedisTemplate.opsForValue().get(deviceCodeKey);
+            int i = Integer.parseInt(s);
+            if (i >= 2){
+                // 当前设备超过下单次数
+                return true;
+            }else {
+                stringRedisTemplate.opsForValue().increment(deviceCodeKey);
+            }
+        }else {
+            stringRedisTemplate.opsForValue().setIfAbsent(deviceCodeKey,"1",1L, TimeUnit.HOURS);
+        }
+        return false;
+    }
 
 }
