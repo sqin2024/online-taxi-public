@@ -32,14 +32,13 @@ public class OrderService {
 
     public ResponseResult add(OrderRequest orderRequest) {
 
+        /**
+         * 判断预估价格时，使用的计价规则不是最新的，需要重新估价
+         */
         PriceRuleIsNewRequest priceRuleIsNewRequest = new PriceRuleIsNewRequest();
         priceRuleIsNewRequest.setFareType(orderRequest.getFareType());
         priceRuleIsNewRequest.setFareVersion(orderRequest.getFareVersion());
         ResponseResult<Boolean> aNew = servicePriceClient.isNew(priceRuleIsNewRequest);
-
-        /**
-         * 预估价格时，使用的计价规则不是最新的，需要重新估价
-         */
         if(!aNew.getData()) {
             return ResponseResult.fail(CommonStatusEnum.PRICE_RULE_CHANGED.getCode(), CommonStatusEnum.PRICE_RULE_CHANGED.getValue());
         }
@@ -47,18 +46,7 @@ public class OrderService {
         /**
          * 判断有正在进行的订单不允许下单
          */
-        QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("passenger_id", orderRequest.getPassengerId());
-        queryWrapper.and(wrapper -> wrapper.eq("order_status", OrderConstants.ORDER_START)
-                .or().eq("order_status", OrderConstants.DRIVER_RECEIVE_ORDER)
-                .or().eq("order_status", OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
-                .or().eq("order_status", OrderConstants.DRIVER_ARRIVED_DEPARTURE)
-                .or().eq("order_status", OrderConstants.PICK_UP_PASSENGER)
-                .or().eq("order_status", OrderConstants.PASSENGER_GETOFF)
-                .or().eq("order_status", OrderConstants.TO_START_PAY));
-
-        Long validOrderNumber = orderMapper.selectCount(queryWrapper);
-        if(validOrderNumber > 0) {
+        if(isPassengerOrderGoingon(orderRequest.getPassengerId()) > 0) {
             return ResponseResult.fail(CommonStatusEnum.ORDER_GOING_ON.getCode(), CommonStatusEnum.ORDER_GOING_ON.getValue());
         }
 
@@ -70,7 +58,6 @@ public class OrderService {
         }
 
         OrderInfo orderInfo = new OrderInfo();
-
         BeanUtils.copyProperties(orderRequest, orderInfo);
         orderInfo.setOrderStatus(OrderConstants.ORDER_START);
         LocalDateTime now = LocalDateTime.now();
@@ -104,6 +91,31 @@ public class OrderService {
             stringRedisTemplate.opsForValue().setIfAbsent(deviceCodeKey,"1",1L, TimeUnit.HOURS);
         }
         return false;
+    }
+
+    /**
+     * 判断是否有 业务中的订单
+     * @param passengerId
+     * @return
+     */
+    private int isPassengerOrderGoingon(Long passengerId){
+        // 判断有正在进行的订单不允许下单
+        QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("passenger_id",passengerId);
+        queryWrapper.and(wrapper->wrapper.eq("order_status",OrderConstants.ORDER_START)
+                .or().eq("order_status",OrderConstants.DRIVER_RECEIVE_ORDER)
+                .or().eq("order_status",OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
+                .or().eq("order_status",OrderConstants.DRIVER_ARRIVED_DEPARTURE)
+                .or().eq("order_status",OrderConstants.PICK_UP_PASSENGER)
+                .or().eq("order_status",OrderConstants.PASSENGER_GETOFF)
+                .or().eq("order_status",OrderConstants.TO_START_PAY)
+        );
+
+
+        Integer validOrderNumber = orderMapper.selectCount(queryWrapper).intValue();
+
+        return validOrderNumber;
+
     }
 
 }

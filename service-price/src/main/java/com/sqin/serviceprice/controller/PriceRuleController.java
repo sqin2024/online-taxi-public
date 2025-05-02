@@ -41,8 +41,13 @@ public class PriceRuleController {
      */
     @PostMapping("/is-new")
     public ResponseResult<Boolean> isNew(@RequestBody PriceRuleIsNewRequest priceRuleIsNewRequest){
-
         return priceRuleService.isNew(priceRuleIsNewRequest.getFareType(), priceRuleIsNewRequest.getFareVersion());
+    }
+
+
+    @GetMapping("/if-exists")
+    public ResponseResult<Boolean> ifExists(@RequestBody PriceRule priceRule) {
+        return priceRuleService.ifExists(priceRule);
     }
 
 }
