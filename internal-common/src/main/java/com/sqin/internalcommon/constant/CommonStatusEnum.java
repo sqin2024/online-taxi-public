@@ -16,6 +16,8 @@ public enum CommonStatusEnum {
 
     PRICE_RULE_NOT_EDIT(1302, "计价规则没有变化"),
 
+    PRICE_RULE_CHANGED(1303, "计价规则已经发生变化"),
+
     MAP_DISTRICT_ERROR(1400, "请求地区信息错误"),
 
     DRIVER_CAR_BIND_NOT_EXIST(1501, "司机汽车绑定关系不存在"),
@@ -28,7 +30,7 @@ public enum CommonStatusEnum {
 
     DRIVER_NOT_EXIST(1600, "司机不存在"),
 
-
+    ORDER_GOING_ON(1700, "有正在进行的订单"),
 
     SUCCESS(1, "success"),
     FAIL(0, "fail");
