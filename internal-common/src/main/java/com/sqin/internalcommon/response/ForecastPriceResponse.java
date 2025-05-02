@@ -11,4 +11,7 @@ public class ForecastPriceResponse {
 
     private String vehicleType;
 
+    private String fareType;
+
+    private Integer fareVersion;
 }
