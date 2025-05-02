@@ -32,6 +32,8 @@ public enum CommonStatusEnum {
 
     ORDER_GOING_ON(1700, "有正在进行的订单"),
 
+    CITY_SERVICE_NOT_SERVICE(1701, "当前城市不提供服务"),
+
     /**
      * 下单异常
      */
