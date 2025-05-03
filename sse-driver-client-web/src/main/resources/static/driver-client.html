@@ -1,0 +1,42 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body>
+<h1>司机监听测试页面 - 模拟司机客户端</h1>
+<button onclick="setMessageContent('点了一次')">测试message展示</button>
+<div id="message"></div>
+<button onclick="closeConnection()">关闭连接</button>
+<script>
+    driverId = "1";
+    source = null;
+    if(window.EventSource) {
+        source = new EventSource("http://localhost:9000/connect/" + driverId);
+
+        source.addEventListener("message", function(e){
+            content = e.data;
+            console.log("消息内容:" + content)
+
+            setMessageContent(content);
+        })
+    }
+
+    function setMessageContent(content) {
+        document.getElementById("message").innerHTML+=(content + '<br>');
+    }
+
+    function closeConnection() {
+        console.log("close connect.");
+        source.close();
+        // 服务端map的移除
+        httpRequest = new XMLHttpRequest();
+        httpRequest.open("get", "http://localhost:9000/close/" + driverId);
+        httpRequest.send();
+    }
+</script>
+
+</body>
+
+
+</html>
