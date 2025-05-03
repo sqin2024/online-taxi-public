@@ -1,6 +1,7 @@
 package com.sqin.apipassenger.service;
 
 import com.sqin.apipassenger.remote.ServiceOrderClient;
+import com.sqin.internalcommon.constant.IdentityConstant;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.request.OrderRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,15 @@ public class OrderService {
 
     public ResponseResult add(OrderRequest orderRequest) {
         return serviceOrderClient.add(orderRequest);
+    }
+
+    /**
+     * 取消订单
+     * @param orderId
+     * @return
+     */
+    public ResponseResult cancel(Long orderId){
+        return serviceOrderClient.cancel(orderId, IdentityConstant.PASSENGER_IDENTITY);
     }
 
 }

@@ -12,4 +12,6 @@ public interface ServiceOrderClient {
     @PostMapping("/order/add")
     public ResponseResult add(@RequestBody OrderRequest orderRequest);
 
+    @PostMapping("/cancel")
+    public ResponseResult cancel(Long orderId, String identity);
 }

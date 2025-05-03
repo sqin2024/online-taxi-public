@@ -1,6 +1,7 @@
 package com.sqin.apidriver.service;
 
 import com.sqin.apidriver.remote.ServiceOrderClient;
+import com.sqin.internalcommon.constant.IdentityConstant;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.request.OrderRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,14 +54,14 @@ public class ApiDriverOrderInfoService {
         return serviceOrderClient.passengerGetoff(orderRequest);
     }
 
-//    /**
-//     * 取消订单的
-//     * @param orderId
-//     * @return
-//     */
-//    public ResponseResult cancel(Long orderId){
-//        return  serviceOrderClient.cancel(orderId, IdentityConstant.DRIVER_IDENTITY);
-//    }
+    /**
+     * 取消订单的
+     * @param orderId
+     * @return
+     */
+    public ResponseResult cancel(Long orderId){
+        return  serviceOrderClient.cancel(orderId, IdentityConstant.DRIVER_IDENTITY);
+    }
 //
 //    /**
 //     * 订单详情
