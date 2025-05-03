@@ -114,21 +114,35 @@ public class OrderService {
          */
         orderMapper.insert(orderInfo);
 
-        /**
-         * 派单
-         */
-        dispatchRealTimeOrder(orderInfo);
+        for (int i = 0; i < 6; i++) {
+
+            /**
+             * 派单，每20秒循环一次
+             */
+            int result = dispatchRealTimeOrder(orderInfo);
+            if (result == 1) {
+                break;
+            }
+
+            try {
+                Thread.sleep(2);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         return ResponseResult.success();
     }
 
     /**
      * 实时订单派单逻辑
-     *
+     * <p>
      * 单机情况下，解决派单的并发问题
      *
      * @param orderInfo
      */
-    public void dispatchRealTimeOrder(OrderInfo orderInfo) {
+    public int dispatchRealTimeOrder(OrderInfo orderInfo) {
+        int result = 0;
         // 2km
         String depLongitude = orderInfo.getDepLongitude();
         String depLatitude = orderInfo.getDepLatitude();
@@ -179,10 +193,10 @@ public class OrderService {
                      */
                     if (isDriverOrderGoingon(driverId) > 0) {
                         lock.unlock();
-                        continue ;
+                        continue;
                     }
                     // 直接给司机派单
-                    log.info("车辆ID："+carId+"找到了正在出车的司机");
+                    log.info("车辆ID：" + carId + "找到了正在出车的司机");
 
                     orderInfo.setDriverId(driverId);
                     orderInfo.setDriverPhone(driverPhone);
@@ -201,49 +215,43 @@ public class OrderService {
 
                     // 通知司机
                     JSONObject driverContent = new JSONObject();
-                    driverContent.put("orderId",orderInfo.getId());
-                    driverContent.put("passengerId",orderInfo.getPassengerId());
-                    driverContent.put("passengerPhone",orderInfo.getPassengerPhone());
-                    driverContent.put("departure",orderInfo.getDeparture());
-                    driverContent.put("depLongitude",orderInfo.getDepLongitude());
-                    driverContent.put("depLatitude",orderInfo.getDepLatitude());
+                    driverContent.put("orderId", orderInfo.getId());
+                    driverContent.put("passengerId", orderInfo.getPassengerId());
+                    driverContent.put("passengerPhone", orderInfo.getPassengerPhone());
+                    driverContent.put("departure", orderInfo.getDeparture());
+                    driverContent.put("depLongitude", orderInfo.getDepLongitude());
+                    driverContent.put("depLatitude", orderInfo.getDepLatitude());
 
-                    driverContent.put("destination",orderInfo.getDestination());
-                    driverContent.put("destLongitude",orderInfo.getDestLongitude());
-                    driverContent.put("destLatitude",orderInfo.getDestLatitude());
+                    driverContent.put("destination", orderInfo.getDestination());
+                    driverContent.put("destLongitude", orderInfo.getDestLongitude());
+                    driverContent.put("destLatitude", orderInfo.getDestLatitude());
                     send(driverId, IdentityConstant.DRIVER_IDENTITY, driverContent.toString());
 
                     // 通知乘客
-                    JSONObject passengerContent = new  JSONObject();
-                    passengerContent.put("orderId",orderInfo.getId());
-                    passengerContent.put("driverId",orderInfo.getDriverId());
-                    passengerContent.put("driverPhone",orderInfo.getDriverPhone());
-                    passengerContent.put("vehicleNo",orderInfo.getVehicleNo());
+                    JSONObject passengerContent = new JSONObject();
+                    passengerContent.put("orderId", orderInfo.getId());
+                    passengerContent.put("driverId", orderInfo.getDriverId());
+                    passengerContent.put("driverPhone", orderInfo.getDriverPhone());
+                    passengerContent.put("vehicleNo", orderInfo.getVehicleNo());
                     // 车辆信息，调用车辆服务
                     ResponseResult<Car> carById = serviceDriverUserClient.getCarById(carId);
                     Car carRemote = carById.getData();
 
                     passengerContent.put("brand", carRemote.getBrand());
-                    passengerContent.put("model",carRemote.getModel());
-                    passengerContent.put("vehicleColor",carRemote.getVehicleColor());
+                    passengerContent.put("model", carRemote.getModel());
+                    passengerContent.put("vehicleColor", carRemote.getVehicleColor());
 
-                    passengerContent.put("receiveOrderCarLongitude",orderInfo.getReceiveOrderCarLongitude());
-                    passengerContent.put("receiveOrderCarLatitude",orderInfo.getReceiveOrderCarLatitude());
+                    passengerContent.put("receiveOrderCarLongitude", orderInfo.getReceiveOrderCarLongitude());
+                    passengerContent.put("receiveOrderCarLatitude", orderInfo.getReceiveOrderCarLatitude());
                     send(orderInfo.getPassengerId(), IdentityConstant.PASSENGER_IDENTITY, passengerContent.toString());
 
+                    result = 1;
                     lock.unlock();
                     break radius;
                 }
 
             }
-
-            // 根据解析出来的终端，查询车辆信息
-
-            // 找到符合的车辆，进行派单
-
-            // 如果派单成功，退出循环
         }
-
 
 
 //        List<TerminalResponse> data = listResponseResult.getData();
@@ -258,11 +266,11 @@ public class OrderService {
 //                }
 //            }
 //        }
-
+        return result;
     }
 
 
-    public void send(Long id, String identity, String message){
+    public void send(Long id, String identity, String message) {
         PushRequest pushRequest = new PushRequest();
         pushRequest.setUserId(id);
         pushRequest.setIdentity(identity);
@@ -336,23 +344,49 @@ public class OrderService {
 
     /**
      * 判断是否有 业务中的订单
+     *
      * @param driverId
      * @return
      */
-    private int isDriverOrderGoingon(Long driverId){
+    private int isDriverOrderGoingon(Long driverId) {
         // 判断有正在进行的订单不允许下单
         QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("driver_id",driverId);
-        queryWrapper.and(wrapper->wrapper
-                .eq("order_status",OrderConstants.DRIVER_RECEIVE_ORDER)
-                .or().eq("order_status",OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
-                .or().eq("order_status",OrderConstants.DRIVER_ARRIVED_DEPARTURE)
-                .or().eq("order_status",OrderConstants.PICK_UP_PASSENGER)
+        queryWrapper.eq("driver_id", driverId);
+        queryWrapper.and(wrapper -> wrapper
+                .eq("order_status", OrderConstants.DRIVER_RECEIVE_ORDER)
+                .or().eq("order_status", OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
+                .or().eq("order_status", OrderConstants.DRIVER_ARRIVED_DEPARTURE)
+                .or().eq("order_status", OrderConstants.PICK_UP_PASSENGER)
 
         );
         Long validOrderNumber = orderMapper.selectCount(queryWrapper);
-        log.info("司机Id："+driverId+",正在进行的订单的数量："+validOrderNumber);
+        log.info("司机Id：" + driverId + ",正在进行的订单的数量：" + validOrderNumber);
         return validOrderNumber.intValue();
+    }
+
+    /**
+     * 去接乘客
+     * @param orderRequest
+     * @return
+     */
+    public ResponseResult toPickUpPassenger(OrderRequest orderRequest) {
+        Long orderId = orderRequest.getOrderId();
+        LocalDateTime toPickUpPassengerTime = orderRequest.getToPickUpPassengerTime();
+        String toPickUpPassengerLongitude = orderRequest.getToPickUpPassengerLongitude();
+        String toPickUpPassengerLatitude = orderRequest.getToPickUpPassengerLatitude();
+        String toPickUpPassengerAddress = orderRequest.getToPickUpPassengerAddress();
+        QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", orderId);
+        OrderInfo orderInfo = orderMapper.selectOne(queryWrapper);
+
+        orderInfo.setToPickUpPassengerAddress(toPickUpPassengerAddress);
+        orderInfo.setToPickUpPassengerLatitude(toPickUpPassengerLatitude);
+        orderInfo.setToPickUpPassengerLongitude(toPickUpPassengerLongitude);
+        orderInfo.setToPickUpPassengerTime(LocalDateTime.now());
+        orderInfo.setOrderStatus(OrderConstants.DRIVER_TO_PICK_UP_PASSENGER);
+
+        orderMapper.updateById(orderInfo);
+        return ResponseResult.success();
     }
 
 }

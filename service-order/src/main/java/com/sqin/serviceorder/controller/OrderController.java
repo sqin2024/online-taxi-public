@@ -1,6 +1,5 @@
 package com.sqin.serviceorder.controller;
 
-import com.sqin.internalcommon.constant.HeaderParamConstant;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.request.OrderRequest;
 import com.sqin.serviceorder.service.OrderService;
@@ -27,6 +26,11 @@ public class OrderController {
 
         System.out.println("service-order" + orderRequest.getAddress());
         return orderService.add(orderRequest);
+    }
+
+    @PostMapping("/to-pick-up-passenger")
+    public ResponseResult changeStatus(@RequestBody OrderRequest orderRequest) {
+        return orderService.toPickUpPassenger(orderRequest);
     }
 
 }
