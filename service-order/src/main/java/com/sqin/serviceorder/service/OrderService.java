@@ -76,7 +76,7 @@ public class OrderService {
         }
 
         /**
-         * 判断有正在进行的订单不允许下单
+         * 判断乘客是否有正在进行的订单
          */
         if (isPassengerOrderGoingon(orderRequest.getPassengerId()) > 0) {
             return ResponseResult.fail(CommonStatusEnum.ORDER_GOING_ON.getCode(), CommonStatusEnum.ORDER_GOING_ON.getValue());
@@ -133,17 +133,53 @@ public class OrderService {
             // 获得终端  "tid": 1276359444, "name": "0y580", "desc": "1918494243060858881",
 
             // 解析终端
-            JSONArray result = JSONArray.fromObject(listResponseResult.getData());
-            for (int j = 0; j < result.size(); j++) {
-                JSONObject jsonObject = result.getJSONObject(j);
-                String carIdString = jsonObject.getString("carId");
-                Long carId = Long.parseLong(carIdString);
+            List<TerminalResponse> data = listResponseResult.getData();
+            // goto语法为了测试
+            radius:
+            for (int j = 0; j < data.size(); j++) {
+                TerminalResponse terminalResponse = data.get(j);
+                Long carId = terminalResponse.getCarId();
+
+                String longitude = terminalResponse.getLongitude();
+                String latitude = terminalResponse.getLatitude();
 
                 ResponseResult<OrderDriverResponse> availableDriver = serviceDriverUserClient.getAvailableDriver(carId);
                 if (availableDriver.getCode() == CommonStatusEnum.AVAILABLE_DRIVER_EMPTY.getCode()) {
-                    continue;
+                    continue radius;
                 } else {
                     log.info("找到了正在出车的司机，车辆id是：" + carId);
+                    OrderDriverResponse orderDriverResponse = availableDriver.getData();
+                    Long driverId = orderDriverResponse.getDriverId();
+                    String driverPhone = orderDriverResponse.getDriverPhone();
+                    String licenseId = orderDriverResponse.getLicenseId();
+                    String vehicleNo = orderDriverResponse.getVehicleNo();
+                    String vehicleTypeFromCar = orderDriverResponse.getVehicleType();
+
+                    /**
+                     * 判断乘客是否有正在进行的订单
+                     */
+                    if (isDriverOrderGoingon(driverId) > 0) {
+                        continue ;
+                    }
+                    // 直接给司机派单
+                    log.info("车辆ID："+carId+"找到了正在出车的司机");
+
+                    orderInfo.setDriverId(driverId);
+                    orderInfo.setDriverPhone(driverPhone);
+                    orderInfo.setCarId(carId);
+
+                    orderInfo.setDepLongitude(longitude);
+                    orderInfo.setDepLatitude(latitude);
+
+                    orderInfo.setReceiveOrderTime(LocalDateTime.now());
+                    orderInfo.setLicenseId(licenseId);
+                    orderInfo.setVehicleNo(vehicleNo);
+                    orderInfo.setVehicleType(vehicleTypeFromCar);
+                    orderInfo.setOrderStatus(OrderConstants.DRIVER_RECEIVE_ORDER);
+
+                    orderMapper.updateById(orderInfo);
+
+                    break radius;
                 }
 
             }
@@ -232,6 +268,27 @@ public class OrderService {
 
         Integer validOrderNumber = orderMapper.selectCount(queryWrapper).intValue();
         return validOrderNumber;
+    }
+
+    /**
+     * 判断是否有 业务中的订单
+     * @param driverId
+     * @return
+     */
+    private int isDriverOrderGoingon(Long driverId){
+        // 判断有正在进行的订单不允许下单
+        QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("driver_id",driverId);
+        queryWrapper.and(wrapper->wrapper
+                .eq("order_status",OrderConstants.DRIVER_RECEIVE_ORDER)
+                .or().eq("order_status",OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
+                .or().eq("order_status",OrderConstants.DRIVER_ARRIVED_DEPARTURE)
+                .or().eq("order_status",OrderConstants.PICK_UP_PASSENGER)
+
+        );
+        Long validOrderNumber = orderMapper.selectCount(queryWrapper);
+        log.info("司机Id："+driverId+",正在进行的订单的数量："+validOrderNumber);
+        return validOrderNumber.intValue();
     }
 
 }
