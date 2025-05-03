@@ -1,13 +1,13 @@
-package com.sqin.ssedriverclientweb;
+package com.sqin.servicessepush;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SseDriverClientWebApplication {
+public class ServiceSsePushApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SseDriverClientWebApplication.class);
+        SpringApplication.run(ServiceSsePushApplication.class);
     }
 
 }

@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>com.sqin</groupId>
-    <artifactId>sse-driver-client-web</artifactId>
+    <artifactId>service-sse-push</artifactId>
 
     <dependencies>
         <dependency>
