@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.sqin.internalcommon.constant.CommonStatusEnum;
 import com.sqin.internalcommon.constant.IdentityConstant;
 import com.sqin.internalcommon.constant.OrderConstants;
+import com.sqin.internalcommon.dto.Car;
 import com.sqin.internalcommon.dto.OrderInfo;
 import com.sqin.internalcommon.dto.PriceRule;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.request.OrderRequest;
 import com.sqin.internalcommon.request.PriceRuleIsNewRequest;
+import com.sqin.internalcommon.request.PushRequest;
 import com.sqin.internalcommon.response.OrderDriverResponse;
 import com.sqin.internalcommon.response.TerminalResponse;
 import com.sqin.internalcommon.util.RedisPrefixUtils;
@@ -30,6 +32,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static org.apache.tomcat.jni.Socket.send;
 
 @Service
 @Slf4j
@@ -207,11 +211,27 @@ public class OrderService {
                     driverContent.put("destination",orderInfo.getDestination());
                     driverContent.put("destLongitude",orderInfo.getDestLongitude());
                     driverContent.put("destLatitude",orderInfo.getDestLatitude());
+                    send(driverId, IdentityConstant.DRIVER_IDENTITY, driverContent.toString());
 
-                    serviceSsePushClient.push(driverId, IdentityConstant.DRIVER_IDENTITY, driverContent.toString());
+                    // 通知乘客
+                    JSONObject passengerContent = new  JSONObject();
+                    passengerContent.put("orderId",orderInfo.getId());
+                    passengerContent.put("driverId",orderInfo.getDriverId());
+                    passengerContent.put("driverPhone",orderInfo.getDriverPhone());
+                    passengerContent.put("vehicleNo",orderInfo.getVehicleNo());
+                    // 车辆信息，调用车辆服务
+                    ResponseResult<Car> carById = serviceDriverUserClient.getCarById(carId);
+                    Car carRemote = carById.getData();
+
+                    passengerContent.put("brand", carRemote.getBrand());
+                    passengerContent.put("model",carRemote.getModel());
+                    passengerContent.put("vehicleColor",carRemote.getVehicleColor());
+
+                    passengerContent.put("receiveOrderCarLongitude",orderInfo.getReceiveOrderCarLongitude());
+                    passengerContent.put("receiveOrderCarLatitude",orderInfo.getReceiveOrderCarLatitude());
+                    send(orderInfo.getPassengerId(), IdentityConstant.PASSENGER_IDENTITY, passengerContent.toString());
 
                     lock.unlock();
-
                     break radius;
                 }
 
@@ -223,6 +243,7 @@ public class OrderService {
 
             // 如果派单成功，退出循环
         }
+
 
 
 //        List<TerminalResponse> data = listResponseResult.getData();
@@ -238,6 +259,16 @@ public class OrderService {
 //            }
 //        }
 
+    }
+
+
+    public void send(Long id, String identity, String message){
+        PushRequest pushRequest = new PushRequest();
+        pushRequest.setUserId(id);
+        pushRequest.setIdentity(identity);
+        pushRequest.setContent(message);
+
+        serviceSsePushClient.push(pushRequest);
     }
 
     private boolean isPriceRuleExists(OrderRequest orderRequest) {
