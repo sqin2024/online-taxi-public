@@ -113,7 +113,7 @@ public class OrderService {
      *
      * @param orderInfo
      */
-    public synchronized void dispatchRealTimeOrder(OrderInfo orderInfo) {
+    public void dispatchRealTimeOrder(OrderInfo orderInfo) {
         // 2km
         String depLongitude = orderInfo.getDepLongitude();
         String depLatitude = orderInfo.getDepLatitude();
@@ -154,6 +154,15 @@ public class OrderService {
                     String licenseId = orderDriverResponse.getLicenseId();
                     String vehicleNo = orderDriverResponse.getVehicleNo();
                     String vehicleTypeFromCar = orderDriverResponse.getVehicleType();
+
+                    /**
+                     * 锁方法，效率大量下降
+                     * 锁司机id不行，因为每个线程都是不同的driverId
+                     * 下面这种写法，意思是driverId放进了常量池，等于全部锁的同一个driverId
+                     */
+                    synchronized ((driverId + "").intern()){
+
+                    }
 
                     /**
                      * 判断乘客是否有正在进行的订单
