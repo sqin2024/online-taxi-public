@@ -16,8 +16,6 @@ import com.sqin.serviceorder.remote.ServiceDriverUserClient;
 import com.sqin.serviceorder.remote.ServiceMapClient;
 import com.sqin.serviceorder.remote.ServicePriceClient;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -111,9 +109,11 @@ public class OrderService {
     /**
      * 实时订单派单逻辑
      *
+     * 单机情况下，解决派单的并发问题
+     *
      * @param orderInfo
      */
-    public void dispatchRealTimeOrder(OrderInfo orderInfo) {
+    public synchronized void dispatchRealTimeOrder(OrderInfo orderInfo) {
         // 2km
         String depLongitude = orderInfo.getDepLongitude();
         String depLatitude = orderInfo.getDepLatitude();
