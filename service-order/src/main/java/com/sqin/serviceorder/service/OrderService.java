@@ -13,7 +13,6 @@ import com.sqin.internalcommon.request.PriceRuleIsNewRequest;
 import com.sqin.internalcommon.request.PushRequest;
 import com.sqin.internalcommon.response.OrderDriverResponse;
 import com.sqin.internalcommon.response.TerminalResponse;
-import com.sqin.internalcommon.response.TrsearchResponse;
 import com.sqin.internalcommon.util.RedisPrefixUtils;
 import com.sqin.serviceorder.mapper.OrderMapper;
 import com.sqin.serviceorder.remote.ServiceDriverUserClient;
@@ -35,8 +34,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static org.apache.tomcat.jni.Socket.send;
 
 @Service
 @Slf4j
@@ -460,11 +457,13 @@ public class OrderService {
         System.out.println("开始时间：" + starttime);
         System.out.println("结束时间：" + endtime);
         // 1668078028000l,测试的时候不要跨天
-        ResponseResult<TrsearchResponse> trsearch = serviceMapClient.trsearch(carById.getData().getTid(), starttime, endtime);
-        TrsearchResponse data = trsearch.getData();
-        Long driveMile = data.getDriveMile();
-        Long driveTime = data.getDriveTime();
+//        ResponseResult<TrsearchResponse> trsearch = serviceMapClient.trsearch(carById.getData().getTid(), starttime, endtime);
+//        TrsearchResponse data = trsearch.getData();
+//        Long driveMile = data.getDriveMile();
+//        Long driveTime = data.getDriveTime();
 
+        Long driveMile = 4332L;
+        Long driveTime = 2253l;
         orderInfo.setDriveMile(driveMile);
         orderInfo.setDriveTime(driveTime);
 

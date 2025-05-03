@@ -15,6 +15,6 @@ public interface ServiceMapClient {
     @PostMapping("/terminal/aroundsearch")
     public ResponseResult<List<TerminalResponse>> aroundSearch(@RequestParam String center, @RequestParam Integer radius);
 
-    @PostMapping("/trsearch")
+    @PostMapping("/terminal/trsearch")
     public ResponseResult<TrsearchResponse> trsearch(@RequestParam String tid, @RequestParam Long starttime, @RequestParam Long endtime);
 }
