@@ -16,6 +16,8 @@ import com.sqin.serviceorder.remote.ServiceDriverUserClient;
 import com.sqin.serviceorder.remote.ServiceMapClient;
 import com.sqin.serviceorder.remote.ServicePriceClient;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -44,6 +46,9 @@ public class OrderService {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     public ResponseResult add(OrderRequest orderRequest) {
 
@@ -155,19 +160,15 @@ public class OrderService {
                     String vehicleNo = orderDriverResponse.getVehicleNo();
                     String vehicleTypeFromCar = orderDriverResponse.getVehicleType();
 
-                    /**
-                     * 锁方法，效率大量下降
-                     * 锁司机id不行，因为每个线程都是不同的driverId
-                     * 下面这种写法，意思是driverId放进了常量池，等于全部锁的同一个driverId
-                     */
-                    synchronized ((driverId + "").intern()){
-
-                    }
+                    String lockKey = (driverId + "").intern();
+                    RLock lock = redissonClient.getLock(lockKey);
+                    lock.lock();
 
                     /**
                      * 判断乘客是否有正在进行的订单
                      */
                     if (isDriverOrderGoingon(driverId) > 0) {
+                        lock.unlock();
                         continue ;
                     }
                     // 直接给司机派单
@@ -187,6 +188,7 @@ public class OrderService {
                     orderInfo.setOrderStatus(OrderConstants.DRIVER_RECEIVE_ORDER);
 
                     orderMapper.updateById(orderInfo);
+                    lock.unlock();
 
                     break radius;
                 }
