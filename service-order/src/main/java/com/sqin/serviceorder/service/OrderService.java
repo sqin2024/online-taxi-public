@@ -2,6 +2,7 @@ package com.sqin.serviceorder.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.sqin.internalcommon.constant.CommonStatusEnum;
+import com.sqin.internalcommon.constant.IdentityConstant;
 import com.sqin.internalcommon.constant.OrderConstants;
 import com.sqin.internalcommon.dto.OrderInfo;
 import com.sqin.internalcommon.dto.PriceRule;
@@ -15,7 +16,9 @@ import com.sqin.serviceorder.mapper.OrderMapper;
 import com.sqin.serviceorder.remote.ServiceDriverUserClient;
 import com.sqin.serviceorder.remote.ServiceMapClient;
 import com.sqin.serviceorder.remote.ServicePriceClient;
+import com.sqin.serviceorder.remote.ServiceSsePushClient;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONObject;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
@@ -49,6 +52,9 @@ public class OrderService {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private ServiceSsePushClient serviceSsePushClient;
 
     public ResponseResult add(OrderRequest orderRequest) {
 
@@ -188,6 +194,22 @@ public class OrderService {
                     orderInfo.setOrderStatus(OrderConstants.DRIVER_RECEIVE_ORDER);
 
                     orderMapper.updateById(orderInfo);
+
+                    // 通知司机
+                    JSONObject driverContent = new JSONObject();
+                    driverContent.put("orderId",orderInfo.getId());
+                    driverContent.put("passengerId",orderInfo.getPassengerId());
+                    driverContent.put("passengerPhone",orderInfo.getPassengerPhone());
+                    driverContent.put("departure",orderInfo.getDeparture());
+                    driverContent.put("depLongitude",orderInfo.getDepLongitude());
+                    driverContent.put("depLatitude",orderInfo.getDepLatitude());
+
+                    driverContent.put("destination",orderInfo.getDestination());
+                    driverContent.put("destLongitude",orderInfo.getDestLongitude());
+                    driverContent.put("destLatitude",orderInfo.getDestLatitude());
+
+                    serviceSsePushClient.push(driverId, IdentityConstant.DRIVER_IDENTITY, driverContent.toString());
+
                     lock.unlock();
 
                     break radius;
