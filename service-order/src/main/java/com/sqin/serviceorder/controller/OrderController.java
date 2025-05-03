@@ -54,4 +54,24 @@ public class OrderController {
         return orderService.passengerGetoff(orderRequest);
     }
 
+    /**
+     * 司机发起收款
+     * @param orderRequest
+     * @return
+     */
+    @PostMapping("/push-pay-info")
+    public ResponseResult pushPayInfo(@RequestBody OrderRequest orderRequest){
+        return orderService.pushPayInfo(orderRequest);
+    }
+
+    /**
+     * 支付完成
+     * @param orderRequest
+     * @return
+     */
+    @PostMapping("/pay")
+    public ResponseResult pay(@RequestBody OrderRequest orderRequest){
+
+        return orderService.pay(orderRequest);
+    }
 }

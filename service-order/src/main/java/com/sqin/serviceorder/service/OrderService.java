@@ -478,4 +478,28 @@ public class OrderService {
         return ResponseResult.success();
     }
 
+    public ResponseResult pushPayInfo(OrderRequest orderRequest) {
+        Long orderId = orderRequest.getOrderId();
+
+        OrderInfo orderInfo = orderMapper.selectById(orderId);
+        orderInfo.setOrderStatus(OrderConstants.TO_START_PAY);
+        orderMapper.updateById(orderInfo);
+        return ResponseResult.success();
+    }
+
+    /**
+     * 支付
+     * @param orderRequest
+     * @return
+     */
+    public ResponseResult pay(OrderRequest orderRequest){
+
+        Long orderId = orderRequest.getOrderId();
+        OrderInfo orderInfo = orderMapper.selectById(orderId);
+
+        orderInfo.setOrderStatus(OrderConstants.SUCCESS_PAY);
+        orderMapper.updateById(orderInfo);
+        return ResponseResult.success();
+    }
+
 }
