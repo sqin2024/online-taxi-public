@@ -2,6 +2,7 @@ package com.sqin.serviceorder.remote;
 
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.response.TerminalResponse;
+import com.sqin.internalcommon.response.TrsearchResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,4 +15,6 @@ public interface ServiceMapClient {
     @PostMapping("/terminal/aroundsearch")
     public ResponseResult<List<TerminalResponse>> aroundSearch(@RequestParam String center, @RequestParam Integer radius);
 
+    @PostMapping("/trsearch")
+    public ResponseResult<TrsearchResponse> trsearch(@RequestParam String tid, @RequestParam Long starttime, @RequestParam Long endtime);
 }
