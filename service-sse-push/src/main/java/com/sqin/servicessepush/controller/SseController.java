@@ -1,5 +1,7 @@
 package com.sqin.servicessepush.controller;
 
+import com.sqin.internalcommon.util.SsePrefixUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@Slf4j
 public class SseController {
 
     public static Map<String, SseEmitter> sseEmitterMap = new HashMap<>();
@@ -18,38 +21,50 @@ public class SseController {
 
     /**
      * 建立连接
-     * @param driverId
+     *
+     * @param userId
+     * @param identity
      * @return
      */
-    @GetMapping("/connect/{driverId}")
-    public SseEmitter connect(@PathVariable String driverId) {
-        System.out.println("司机ID " + driverId);
+    @GetMapping("/connect")
+    public SseEmitter connect(@RequestParam Long userId, @RequestParam String identity) {
+        log.info("userID " + userId + ", identity: " + identity);
         SseEmitter sseEmitter = new SseEmitter(0l);
-        sseEmitterMap.put(driverId, sseEmitter);
+
+        String sseMapKey = SsePrefixUtils.generateSseKey(userId, identity);
+        sseEmitterMap.put(sseMapKey, sseEmitter);
         return sseEmitter;
     }
 
     /**
      * 发送消息
-     * @param driverId
+     *
+     * @param userId
+     * @param identity
      * @param content
      * @return
      */
     @GetMapping("/push")
-    public String push(@RequestParam String driverId, @RequestParam String content) {
+    public String push(@RequestParam Long userId, @RequestParam String identity, @RequestParam String content) {
+        String sseMapKey = SsePrefixUtils.generateSseKey(userId, identity);
         try {
-            sseEmitterMap.get(driverId).send(content);
+            if (sseEmitterMap.containsKey(sseMapKey)) {
+                sseEmitterMap.get(sseMapKey).send(content);
+            } else {
+                return "推送失败";
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return "给用户" + driverId + ", 发送了消息:" + content;
+        return "给用户" + sseMapKey + ", 发送了消息:" + content;
     }
 
-    @GetMapping("/close/{driverId}")
-    public String close(@PathVariable String driverId) {
-        System.out.println("close connect " + driverId);
-        if(sseEmitterMap.containsKey(driverId)) {
-            sseEmitterMap.remove(driverId);
+    @GetMapping("/close")
+    public String close(@RequestParam Long userId, @RequestParam String identity) {
+        String sseMapKey = SsePrefixUtils.generateSseKey(userId, identity);
+        System.out.println("close connect " + sseMapKey);
+        if (sseEmitterMap.containsKey(sseMapKey)) {
+            sseEmitterMap.remove(sseMapKey);
         }
         return "closed";
     }

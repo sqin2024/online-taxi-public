@@ -12,7 +12,7 @@
     driverId = "1";
     source = null;
     if(window.EventSource) {
-        source = new EventSource("http://localhost:9000/connect/" + driverId);
+        source = new EventSource("http://localhost:9000/connect?userId=1&identity=1");
 
         source.addEventListener("message", function(e){
             content = e.data;
@@ -31,7 +31,7 @@
         source.close();
         // 服务端map的移除
         httpRequest = new XMLHttpRequest();
-        httpRequest.open("get", "http://localhost:9000/close/" + driverId);
+        httpRequest.open("get", "http://localhost:9000/close?userId=1&identity=1");
         httpRequest.send();
     }
 </script>
