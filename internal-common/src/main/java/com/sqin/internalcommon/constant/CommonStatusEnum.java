@@ -36,6 +36,8 @@ public enum CommonStatusEnum {
 
     CITY_SERVICE_NOT_SERVICE(1701, "当前城市不提供服务"),
 
+    AVAILABLE_DRIVER_EMPTY(1506, "可用司机为空"),
+
 
     /**
      * 下单异常

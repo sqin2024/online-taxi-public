@@ -8,6 +8,7 @@ import com.sqin.internalcommon.dto.PriceRule;
 import com.sqin.internalcommon.dto.ResponseResult;
 import com.sqin.internalcommon.request.OrderRequest;
 import com.sqin.internalcommon.request.PriceRuleIsNewRequest;
+import com.sqin.internalcommon.response.OrderDriverResponse;
 import com.sqin.internalcommon.response.TerminalResponse;
 import com.sqin.internalcommon.util.RedisPrefixUtils;
 import com.sqin.serviceorder.mapper.OrderMapper;
@@ -15,6 +16,8 @@ import com.sqin.serviceorder.remote.ServiceDriverUserClient;
 import com.sqin.serviceorder.remote.ServiceMapClient;
 import com.sqin.serviceorder.remote.ServicePriceClient;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -50,7 +53,7 @@ public class OrderService {
          * 查看当前城市是否有司机
          */
         ResponseResult<Boolean> availableDriver = serviceDriverUserClient.isAvailableDriver(orderRequest.getAddress());
-        if(!availableDriver.getData()) {
+        if (!availableDriver.getData()) {
             return ResponseResult.fail(CommonStatusEnum.CITY_DRIVER_EMPTY.getCode(), CommonStatusEnum.CITY_DRIVER_EMPTY.getValue());
         }
 
@@ -107,6 +110,7 @@ public class OrderService {
 
     /**
      * 实时订单派单逻辑
+     *
      * @param orderInfo
      */
     public void dispatchRealTimeOrder(OrderInfo orderInfo) {
@@ -123,13 +127,26 @@ public class OrderService {
         ResponseResult<List<TerminalResponse>> listResponseResult = null;
         for (int i = 0; i < radiusList.size(); i++) {
             Integer radius = radiusList.get(i);
-            listResponseResult =  serviceMapClient.aroundSearch(center, radius);
+            listResponseResult = serviceMapClient.aroundSearch(center, radius);
             log.info("寻找车辆" + radius);
             log.info("找到车辆了，数量为：" + listResponseResult.getData().size());
-            break;
-            // 获得终端
+            // 获得终端  "tid": 1276359444, "name": "0y580", "desc": "1918494243060858881",
 
             // 解析终端
+            JSONArray result = JSONArray.fromObject(listResponseResult.getData());
+            for (int j = 0; j < result.size(); j++) {
+                JSONObject jsonObject = result.getJSONObject(j);
+                String carIdString = jsonObject.getString("carId");
+                Long carId = Long.parseLong(carIdString);
+
+                ResponseResult<OrderDriverResponse> availableDriver = serviceDriverUserClient.getAvailableDriver(carId);
+                if (availableDriver.getCode() == CommonStatusEnum.AVAILABLE_DRIVER_EMPTY.getCode()) {
+                    continue;
+                } else {
+                    log.info("找到了正在出车的司机，车辆id是：" + carId);
+                }
+
+            }
 
             // 根据解析出来的终端，查询车辆信息
 
