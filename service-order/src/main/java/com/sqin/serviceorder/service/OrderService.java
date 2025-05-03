@@ -125,10 +125,16 @@ public class OrderService {
                 break;
             }
 
-            try {
-                Thread.sleep(2);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            if (i == 5) {
+                // 订单无效
+                orderInfo.setOrderStatus(OrderConstants.ORDER_INVALID);
+                orderMapper.updateById(orderInfo);
+            } else {
+                try {
+                    Thread.sleep(2);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
